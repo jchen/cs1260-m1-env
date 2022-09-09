@@ -138,12 +138,11 @@ message: |
   docker run hello-world
   ------
 EOT
-    echo "⚠️ You will need to select the first option!"
-    limactl start docker.yaml
+    limactl start --tty=false docker.yaml
     rm docker.yaml
 else
     echo "🦙 You've got a Lima context in your Docker already, you're all set!"
-    limactl start docker
+    limactl start --tty=false docker
 fi
 
 docker context list | grep lima | grep unix:///Users/$USER/.lima/docker/sock/docker.sock
