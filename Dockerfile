@@ -29,7 +29,7 @@ RUN opam init -a --disable-sandboxing && \
     opam update -y && \
     opam upgrade -y && \
     eval $(opam env) && \
-    opam install -y core core_unix menhir ppx_blob ppx_deriving ppx_inline_test ppx_let shexp yojson && \
+    opam install -y core core_unix menhir ppx_blob ppx_deriving ppx_inline_test ppx_let shexp yojson utop ounit2 && \
     eval $(opam env)
 
 CMD ["zsh"]
