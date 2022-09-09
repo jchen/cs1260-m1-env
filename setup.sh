@@ -1,7 +1,7 @@
 #!/bin/bash
 if [[ $(arch) != arm64 ]]; then
-    echo "This script is only for M1 Macs"
-    exit 1
+  echo "This script is only for M1 Macs"
+  exit 1
 fi
 
 USER=$(whoami)
@@ -17,37 +17,37 @@ echo "Setting up x86_64 Docker container. Make sure you're in the directory you 
 # Checks if brew is installed, and install if it not
 which -s brew
 if [[ $? != 0 ]]; then
-    # Install Homebrew
-    echo "🍺 Brew not found, installing"
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  # Install Homebrew
+  echo "🍺 Brew not found, installing"
+  ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 else
-    echo "🍺 Brew found, updating"
-    brew update
+  echo "🍺 Brew found, updating"
+  brew update
 fi
 
 which -s docker
 if [[ $? != 0 ]]; then
-    # Install Docker
-    echo "🐳 Docker not found, installing"
-    brew install docker
+  # Install Docker
+  echo "🐳 Docker not found, installing"
+  brew install docker
 else
-    echo "🐳 Docker found, you're set!"
+  echo "🐳 Docker found, you're set!"
 fi
 
 which -s limactl
 if [[ $? != 0 ]]; then
-    # Install Lima
-    echo "🦙 Lima not found, installing"
-    brew install lima
+  # Install Lima
+  echo "🦙 Lima not found, installing"
+  brew install lima
 else
-    echo "🦙 Lima found, you're set!"
+  echo "🦙 Lima found, you're set!"
 fi
 
 echo "🦙 Checking if Lima Docker instance exists:"
 limactl list | grep docker
 if [[ $? != 0 ]]; then
-    echo "🦙 Setting up Lima context for Docker"
-    cat <<EOT >>docker.yaml
+  echo "🦙 Setting up Lima context for Docker"
+  cat <<EOT >>docker.yaml
 # Example to use Docker instead of containerd & nerdctl
 # $ limactl start ./docker.yaml
 # $ limactl shell docker docker run -it -v $HOME:$HOME --rm alpine
@@ -138,20 +138,20 @@ message: |
   docker run hello-world
   ------
 EOT
-    limactl start --tty=false docker.yaml
-    rm docker.yaml
+  limactl start --tty=false docker.yaml
+  rm docker.yaml
 else
-    echo "🦙 You've got a Lima context in your Docker already, you're all set!"
-    limactl start --tty=false docker
+  echo "🦙 You've got a Lima context in your Docker already, you're all set!"
+  limactl start --tty=false docker
 fi
 
 docker context list | grep lima | grep unix:///Users/$USER/.lima/docker/sock/docker.sock
 if [[ $? != 0 ]]; then
-    # Install Lima
-    echo "🦙 Lima Docker context not found, setting up"
-    docker context create lima --docker "host=unix:///Users/$USER/.lima/docker/sock/docker.sock"
+  # Install Lima
+  echo "🦙 Lima Docker context not found, setting up"
+  docker context create lima --docker "host=unix:///Users/$USER/.lima/docker/sock/docker.sock"
 else
-    echo "🦙 Lima Docker context found, you're set!"
+  echo "🦙 Lima Docker context found, you're set!"
 fi
 
 docker context use lima
@@ -159,34 +159,45 @@ docker context use lima
 echo
 docker ps | grep $IMAGE
 if [[ $? != 0 ]]; then
-    # Install Lima
-    echo "🐳 Pulling $IMAGE image..."
-    docker pull $IMAGE
-    echo "🐳 Setting up image..."
-    docker run -d -it \
-        -v $(pwd):$IMAGE_HOME/$CONTAINER_NAME \
-        -v ~/.gitconfig:/etc/gitconfig \
-        -v ~/.ssh:$IMAGE_HOME/.ssh \
-        -h $CONTAINER_NAME --name $CONTAINER_NAME $IMAGE
-    echo "🐳 $IMAGE named $CONTAINER_NAME has been set up!"
+  # Install Lima
+  echo "🐳 Pulling $IMAGE image..."
+  docker pull $IMAGE
+  echo "🐳 Setting up image..."
+  docker run -d -it \
+    -v $(pwd):$IMAGE_HOME/$CONTAINER_NAME \
+    -v ~/.gitconfig:/etc/gitconfig \
+    -v ~/.ssh:$IMAGE_HOME/.ssh \
+    -h $CONTAINER_NAME --name $CONTAINER_NAME $IMAGE
+  echo "🐳 $IMAGE named $CONTAINER_NAME has been set up!"
 else
-    echo "🐳 You already have a $IMAGE image, you don't need to pull or create the image again!"
+  echo "🐳 You already have a $IMAGE image, you don't need to pull or create the image again!"
 fi
 
 rm -f start
 cat <<EOT >>start
 #!/bin/bash
-limactl start docker
-docker start $CONTAINER_NAME
+if [[ \$(hostname) != $CONTAINER_NAME ]]; then
+    # Starts container
+    echo "🦙🐳 Starting container..."
+    limactl start docker
+    docker start $CONTAINER_NAME
+else
+    echo "🦙🐳 You're already in the container."
+fi
 EOT
 
 rm -f stop
 cat <<EOT >>stop
 #!/bin/bash
-docker stop $CONTAINER_NAME
-# Uncomment the below line if you also want to stop Lima
-every time you stop (this is slow).
-# limactl stop docker
+if [[ \$(hostname) != $CONTAINER_NAME ]]; then
+    # Starts container
+    echo "🦙🐳 Stopping container..."
+    docker stop $CONTAINER_NAME
+    # Uncomment the below line if you also want to stop Lima every time you stop (this is slow).
+    # limactl stop docker
+else
+    echo "🦙🐳 You're in the container, run this from outside the container."
+fi
 EOT
 
 chmod +x ./start ./stop
