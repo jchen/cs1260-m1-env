@@ -162,12 +162,13 @@ if [[ $? != 0 ]]; then
   # Install Lima
   echo "🐳 Pulling $IMAGE image..."
   docker pull $IMAGE
+  docker tag $IMAGE $CONTAINER_NAME
   echo "🐳 Setting up image..."
   docker run -d -it \
     -v $(pwd):$IMAGE_HOME/$CONTAINER_NAME \
     -v ~/.gitconfig:/etc/gitconfig \
     -v ~/.ssh:$IMAGE_HOME/.ssh \
-    -h $CONTAINER_NAME --name $CONTAINER_NAME $IMAGE
+    -h $CONTAINER_NAME --name $CONTAINER_NAME $CONTAINER_NAME
   echo "🐳 $IMAGE named $CONTAINER_NAME has been set up!"
 else
   echo "🐳 You already have a $IMAGE image, you don't need to pull or create the image again!"
