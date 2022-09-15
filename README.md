@@ -7,3 +7,8 @@ The easiest way to set this up is to create a directory for the course somewhere
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/jchen/cs1260-m1-env/main/setup.sh)"
 ```
 This takes a bit of time (10-15 minutes) so let it run through entirely. At the end of this process you should have a working Docker container running x86_64 Debian (with the necessary course packages). 
+
+## Post Set Up
+After the setup script has completed, the resulting `./start` script will start the container, and the `./stop` script will stop it. If you also wish to stop Lima, you can uncomment that line from the `stop` script (this increases startup times). 
+
+To enter the container, run `./start` from your terminal. If, once you enter the container, dune isn't available, run `eval $(opam env)`. If dune is still not available or, for whatever reason, something doesn't work, run the commands in [this script](https://github.com/BrownCS1260/devenv/blob/main/home/setup-2.sh) in order.
